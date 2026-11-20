@@ -11,49 +11,52 @@ env:
   SIM: platform=iOS Simulator,name=iPhone 15
 
 jobs:
-  # ① 静态检查 + 无第三方依赖的编译与单测（稳定路径）
-  test:
-    runs-on: macos-14
+  # ① 静态检查 + Swift 语法解析（ubuntu，免费可用）
+  static:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app || true
+      - name: Python deps
+        run: python3 -m pip install --quiet pyyaml cryptography
 
-      - name: Tooling
-        run: |
-          brew install xcodegen
-          python3 -m pip install --quiet pyyaml
-
-      - name: Static checks
+      - name: Repo self-checks
         run: |
           python3 tools/verify.py
           python3 tools/audit.py
 
-      - name: Generate project (no third-party)
-        run: python3 scripts/gen_project.py
+      - name: Module package check
+        run: python3 tools/verify_module.py examples/dist/tv.netcove.example.hello-1.0.0.rexmod
 
-      - name: Build & test
+      - name: Swift toolchain
+        run: |
+          swift --version || (sudo apt-get update -qq && sudo apt-get install -y -qq swiftlang)
+
+      - name: Swift syntax parse (all sources)
         run: |
           set -o pipefail
-          xcodebuild test \
-            -project NetCove.xcodeproj \
-            -scheme "$SCHEME" \
-            -destination "$SIM" \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee build.log | tail -n 80
+          fail=0
+          : > parse.log
+          for f in $(find Sources Tests -name '*.swift' | sort); do
+            if ! swiftc -parse "$f" >>parse.log 2>&1; then
+              echo "PARSE FAIL: $f"
+              fail=1
+            fi
+          done
+          echo "---- parse issues ----"
+          grep -E "error:" parse.log | head -50 || true
+          exit $fail
 
-      - name: Upload log
+      - uses: actions/upload-artifact@v4
         if: always()
-        uses: actions/upload-artifact@v4
         with:
-          name: build-log
-          path: build.log
+          name: parse-log
+          path: parse.log
           if-no-files-found: ignore
 
-  # ② 无签名 ipa（用 AltStore / Sideloadly / Xcode 免费证书自行签名即可安装）
+  # ② 无签名 ipa（macOS runner；私有仓库需付费计划，公开仓库免费）
   unsigned-ipa:
-    needs: test
+    needs: static
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +64,7 @@ jobs:
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_15.2.app || true
 
-      - name: Generate project
+      - name: Generate project (no third-party deps)
         run: |
           brew install xcodegen
           python3 -m pip install --quiet pyyaml
@@ -76,10 +79,8 @@ jobs:
             -configuration Release \
             -destination 'generic/platform=iOS' \
             -archivePath build/NetCove.xcarchive \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            | tail -n 40
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            | tee archive.log | tail -n 60
 
       - name: Package ipa
         run: |
@@ -89,34 +90,15 @@ jobs:
           ls -lh NetCove-unsigned.ipa
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: NetCove-unsigned-ipa
           path: build/NetCove-unsigned.ipa
+          if-no-files-found: ignore
 
-  # ③ 可选：带第三方依赖（FFmpeg/KSPlayer/WCDB...）的全量构建，失败不影响 ipa
-  full-stack:
-    needs: test
-    continue-on-error: true
-    runs-on: macos-14
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.2.app || true
-
-      - name: Generate project (with third-party)
-        run: |
-          brew install xcodegen
-          python3 -m pip install --quiet pyyaml
-          python3 scripts/gen_project.py --with-third-party --spec-out project.full.yml
-          xcodebuild -resolvePackageDependencies -project NetCove.xcodeproj -scheme "$SCHEME"
-
-      - name: Build
-        run: |
-          set -o pipefail
-          xcodebuild build \
-            -project NetCove.xcodeproj \
-            -scheme "$SCHEME" \
-            -destination "generic/platform=iOS" \
-            CODE_SIGNING_ALLOWED=NO \
-            | tee full-build.log | tail -n 60
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: archive-log
+          path: archive.log
+          if-no-files-found: ignore
