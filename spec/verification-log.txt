@@ -1,0 +1,54 @@
+NetCove 验证日志  2026-11-20T21:40:18+08:00
+
+===== 1) verify.py =====
+== notes ==
+  - swift files checked: 57
+  - project.yml paths verified
+  - openapi paths: 17, client endpoints: 17
+  - localization keys: 71
+  - no paywall leftovers
+  - required files: 13
+  - shaders: 3
+  - i18n: ar=70/71, de=64/71, es=69/71, fr=65/71, it=66/71, ja=69/71, ko=69/71, pt-BR=66/71, pt=67/71, ru=70/71, zh-HK=70/71, zh-Hans=71/71, zh-Hant=70/71
+  - tuning matrix rows: 149
+  - tuning params generated
+  - rexmod built: tv.netcove.example.hello-1.0.0.rexmod
+  - privacy: 2 API categories
+  - icons: 12 entries
+  - tests: 6 files
+  - server routes: 19, client endpoints served: 17/17
+== issues ==
+  (none)
+
+OK: all checks passed
+
+===== 2) audit.py =====
+== notes ==
+  - Endpoint.path: 17/17 cases covered
+  - Endpoint.method: 17/17 cases covered (default 覆盖)
+  - Endpoint.isAuthDomain: 17/17 cases covered (default 覆盖)
+  - 类型引用: 191 个自有类型全部有定义
+  - 导航目的地: 19 个 View 定义全部可解析
+  - 文档数字: 矩阵 149 行 / 测试 6 文件 / 源码 57 文件
+== warnings ==
+  ! (none)
+== errors ==
+  ✗ (none)
+
+OK: audit passed
+
+===== 3) verify_module.py =====
+package : examples/dist/tv.netcove.example.hello-1.0.0.rexmod
+id      : tv.netcove.example.hello 1.0.0
+entries : ['main.js', 'module.json']
+digest  : 0fc4272f55ef603630665cb8d34aa272343a435a1e1244ec1d58b384a3d0426a
+signature: valid
+
+OK: package valid
+
+===== 4) 后端冒烟 =====
+GET /health                          -> {"status": "ok", "time": 1795182039}
+GET /api/metadata/search?q=matrix    -> {"results": [{"id": "603", "title": "The Matrix", "year": 1999, "kind": "movie", "vote": 8
+GET /api/integrations                -> {"integrations": ["trakt", "tmdb", "plex", "jellyfin", "emby"]}
+GET /api/notifications               -> {"notifications": [], "signed_in": false}
+POST /v1/native/passkeys/remove      -> {"removed": true}
