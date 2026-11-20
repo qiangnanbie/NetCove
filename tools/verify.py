@@ -180,8 +180,9 @@ def check_localization_coverage() -> None:
         if lang == 'en':
             continue
         table = pairs_of(os.path.join(lproj, 'Localizable.strings'))
-        translated = sum(1 for k, v in table.items() if v and v != en.get(k))
-        rows.append(f'{lang}={translated}/{len(table)}')
+        same = sum(1 for k, v in table.items() if v == en.get(k))
+        covered = len(table) - same
+        rows.append(f'{lang}={covered}/{len(table)}' + (f'(+{same} 同形词)' if same else ''))
     notes.append('i18n: ' + ', '.join(rows))
 
 
@@ -305,6 +306,32 @@ def check_release_artifacts() -> None:
             issues.append(f'{script} not executable')
 
 
+def check_alignment() -> None:
+    # 依赖声明
+    import yaml
+    config = yaml.safe_load(open(os.path.join(ROOT, 'project.yml')))
+    packages = set((config.get('packages') or {}).keys())
+    expected = {'KSPlayer', 'Alamofire', 'Nuke', 'AMSMB2', 'WCDB'}
+    missing = expected - packages
+    if missing:
+        issues.append(f'project.yml 缺少依赖声明: {sorted(missing)}')
+    else:
+        notes.append(f'dependencies declared: {len(packages)} SPM packages')
+
+    target_deps = config['targets']['NetCove'].get('dependencies', [])
+    if not any('package' in (dep if isinstance(dep, dict) else {}) for dep in target_deps):
+        issues.append('app target 未引用任何 SPM package')
+
+    # 模块边界报告
+    if not os.path.exists(os.path.join(ROOT, 'spec/module-boundaries.md')):
+        issues.append('missing spec/module-boundaries.md (run tools/module_map.py --write)')
+
+    # 持久化抽象与 WCDB 实现
+    for rel in ('Sources/NetCoveData/Persistence.swift', 'Sources/NetCoveData/WCDBPersistence.swift'):
+        if not os.path.exists(os.path.join(ROOT, rel)):
+            issues.append(f'missing {rel}')
+
+
 def check_server() -> None:
     path = os.path.join(ROOT, 'Server/netcove_server.py')
     try:
@@ -331,6 +358,7 @@ def main() -> int:
     check_tuning()
     check_module_pipeline()
     check_release_artifacts()
+    check_alignment()
     check_server()
 
     print('== notes ==')

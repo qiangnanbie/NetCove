@@ -7,7 +7,7 @@
 "discover.recommended" = "Рекомендуем";
 "discover.environment" = "Среда просмотра";
 "discover.metric.libraries" = "Медиатеки";
-"discover.metric.daily" = "Daily";
+"discover.metric.daily" = "Сегодня";
 "library.title" = "Медиатеки";
 "library.empty" = "Медиатек пока нет. Добавьте Jellyfin, Emby, Plex, SMB, WebDAV или локальную папку.";
 "library.add" = "Добавить медиатеку";

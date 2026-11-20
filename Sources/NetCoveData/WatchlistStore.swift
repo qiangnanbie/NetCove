@@ -40,15 +40,4 @@ actor WatchlistStore {
         persist()
     }
 
-    private func persist() {
-        if let data = try? JSONEncoder().encode(items) {
-            try? data.write(to: fileURL, options: .atomic)
-        }
-    }
-
-    private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([MediaItem].self, from: data) else { return }
-        items = decoded
-    }
 }

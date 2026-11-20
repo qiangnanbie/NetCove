@@ -23,6 +23,8 @@ NetCove/
 ├── spec/tuning/               验收矩阵 matrix.csv + checklist.md + 示例结果
 ├── examples/                  示例脚本模块 + 已签名打包的 .rexmod
 ├── Tests/NetCoveTests/        6 个单元测试（含跨语言摘要一致性）
+├── MODULES.md                 Rex 26 个 framework ↔ 本工程 5 个目录的映射
+├── DEPENDENCIES.md            与 Rex 同款的依赖栈（SPM/自编/CocoaPods 分类）
 ├── scripts/                   ci.sh / release.sh
 ├── Resources/                 原创图标 + 文案词条
 ├── spec/                      架构 / 契约 / 鉴权 / 播放调参 / 类型清单 / 差距 / CloudKit / 后端
@@ -55,6 +57,8 @@ cd Server && python3 netcove_server.py     # http://localhost:8787
 | Metal 视频呈现 | AVPlayer 走 `AVPlayerLayer`，FFmpeg 走 `CAMetalLayer`，均已接入播放器 |
 | 弹幕渲染 | Metal instanced quads + CoreText 图集（SwiftUI 版保留为回退） |
 | 云盘 | 115 已实现（设备码/列目录/直链）；光雅走 WebDAV；UGREEN 需 NAS 接口 |
+| 持久化 | `NetCovePersistence` 协议：有 WCDB 走数据库，否则 JSON 文件 |
+| Chromecast | Bonjour 发现已实现；投放需 google-cast-sdk（`#if canImport` 自动启用） |
 | Dolby Vision | profile 识别 + P5/P7/P8 决策已实现；P5 色彩变换需接 libplacebo 着色器 |
 | 字幕 | SRT/VTT 解析已实现；ASS 走 libass；PGS/VobSub 需 FFmpeg 解码 |
 | AI 字幕 | 音频抽取 + Speech.framework 已实现；sherpa-onnx 接口就绪（需模型） |

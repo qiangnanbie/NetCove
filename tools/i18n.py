@@ -515,6 +515,34 @@ for _lang, _table in _EXTRA2.items():
     TRANSLATIONS.setdefault(_lang, {}).update(_table)
 
 
+
+# 第三轮补全：最后一批（多数是单词，之前漏在表里）
+_EXTRA3 = {
+    "ar": {"discover.metric.daily": "اليوم"},
+    "de": {"settings.account.status": "Status", "settings.about.version": "Version",
+           "module.genres": "Genres", "settings.playback.engines": "Engines",
+           "settings.subtitles.bitmap": "Bitmap", "env.pin": "PIN", "player.pause": "Pause"},
+    "es": {"env.pin": "PIN", "detail.minutes": "min"},
+    "fr": {"settings.about.version": "Version", "module.genres": "Genres",
+           "settings.playback.formats": "Formats", "settings.subtitles.bitmap": "Bitmap",
+           "player.pause": "Pause", "detail.minutes": "min"},
+    "it": {"discover.metric.daily": "Oggi", "settings.account": "Account",
+           "settings.subtitles.bitmap": "Bitmap", "env.pin": "PIN", "detail.minutes": "min"},
+    "ja": {"discover.metric.daily": "今日", "env.pin": "PIN"},
+    "ko": {"discover.metric.daily": "오늘", "env.pin": "PIN"},
+    "pt": {"discover.metric.daily": "Hoje", "settings.subtitles.bitmap": "Bitmap",
+           "env.pin": "PIN", "detail.minutes": "min"},
+    "pt-BR": {"discover.metric.daily": "Hoje", "settings.account.status": "Status",
+              "settings.subtitles.bitmap": "Bitmap", "env.pin": "PIN", "detail.minutes": "min"},
+    "ru": {"discover.metric.daily": "Сегодня"},
+    "zh-HK": {"discover.metric.daily": "今日"},
+    "zh-Hant": {"discover.metric.daily": "今日"},
+}
+
+for _lang, _table in _EXTRA3.items():
+    TRANSLATIONS.setdefault(_lang, {}).update(_table)
+
+
 def keys_of(path: str) -> dict[str, str]:
     text = open(path, encoding='utf-8').read()
     return dict(re.findall(r'^"([^"]+)"\s*=\s*"(.*)";\s*$', text, re.M))
@@ -547,8 +575,12 @@ def main() -> int:
     for lang in ['en'] + sorted(TRANSLATIONS):
         path = os.path.join(RES, f'{lang}.lproj/Localizable.strings')
         table = keys_of(path)
-        translated = sum(1 for k, v in table.items() if v and v != en.get(k))
-        print(f'{lang:8} keys={len(table):3}  translated={translated:3}  fallback={len(table) - translated:3}')
+        declared = set(TRANSLATIONS.get(lang, {}))
+        same = sum(1 for k, v in table.items() if declared & {k} and v == en.get(k))
+        missing = sorted(set(en) - declared)
+        label = 'base' if lang == 'en' else f'{len(declared & set(en))}/{len(en)} declined'
+        print(f'{lang:8} keys={len(table):3}  translated={len(table) - len(missing) - same:3}  '
+              f'same-as-EN={same:2}  missing={len(missing):2}  ({label})')
     return 0
 
 

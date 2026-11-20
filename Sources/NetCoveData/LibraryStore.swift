@@ -15,31 +15,35 @@ protocol LibraryPersisting {
 actor LibraryStore: LibraryPersisting {
     private var cache: [Library] = []
     private var itemsByLibrary: [UUID: [MediaItem]] = [:]
-    private let fileURL: URL
+    private let persistence: NetCovePersistence
 
-    init() {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        fileURL = base.appendingPathComponent("libraries.json")
-        load()
+    init(persistence: NetCovePersistence = PersistenceFactory.make()) {
+        self.persistence = persistence
     }
 
-    func load() async -> [Library] { cache }
+    func load() async -> [Library] {
+        if cache.isEmpty {
+            cache = await persistence.readLibraries()
+        }
+        return cache
+    }
 
     func save(_ libraries: [Library]) async {
         cache = libraries
-        persist()
+        await persistence.writeLibraries(libraries)
     }
 
     func delete(id: UUID) async {
         cache.removeAll { $0.id == id }
         itemsByLibrary[id] = nil
-        persist()
+        await persistence.writeLibraries(cache)
     }
 
     func items(in libraryID: UUID) async -> [MediaItem] {
-        itemsByLibrary[libraryID] ?? []
+        if let cached = itemsByLibrary[libraryID] { return cached }
+        let loaded = await persistence.readItems(libraryID: libraryID)
+        itemsByLibrary[libraryID] = loaded
+        return loaded
     }
 
     // MARK: - 扫描
@@ -63,10 +67,11 @@ actor LibraryStore: LibraryPersisting {
         }
 
         itemsByLibrary[library.id] = items
+        await persistence.writeItems(items, libraryID: library.id)
         if let index = cache.firstIndex(where: { $0.id == library.id }) {
             cache[index].itemCount = items.count
             cache[index].lastScanAt = Date()
-            persist()
+            await persistence.writeLibraries(cache)
         }
         return items
     }
@@ -238,19 +243,6 @@ actor LibraryStore: LibraryPersisting {
             }
     }
 
-    // MARK: - 持久化
-
-    private func persist() {
-        if let data = try? JSONEncoder().encode(cache) {
-            try? data.write(to: fileURL, options: .atomic)
-        }
-    }
-
-    private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? JSONDecoder().decode([Library].self, from: data) else { return }
-        cache = decoded
-    }
 }
 
 struct LibraryCredentials {

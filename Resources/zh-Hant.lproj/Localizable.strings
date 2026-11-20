@@ -7,7 +7,7 @@
 "discover.recommended" = "推薦";
 "discover.environment" = "觀看環境";
 "discover.metric.libraries" = "媒體庫";
-"discover.metric.daily" = "Daily";
+"discover.metric.daily" = "今日";
 "library.title" = "媒體庫";
 "library.empty" = "還沒有媒體庫。可以新增 Jellyfin、Emby、Plex、SMB、WebDAV 或本機資料夾。";
 "library.add" = "新增媒體庫";

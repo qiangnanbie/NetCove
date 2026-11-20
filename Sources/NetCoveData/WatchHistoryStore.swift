@@ -8,17 +8,22 @@ import Foundation
 actor WatchHistoryStore {
     private var records: [WatchRecord] = []
     private var items: [UUID: MediaItem] = [:]
-    private let fileURL: URL
+    private let persistence: NetCovePersistence
 
-    init() {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        fileURL = base.appendingPathComponent("watch-history.json")
-        load()
+    init(persistence: NetCovePersistence = PersistenceFactory.make()) {
+        self.persistence = persistence
+    }
+
+    private func loadIfNeeded() async {
+        if records.isEmpty { records = await persistence.readWatchRecords() }
+        if items.isEmpty {
+            let stored = await persistence.readWatchlist()
+            for item in stored { items[item.id] = item }
+        }
     }
 
     func record(itemID: UUID, position: Double, duration: Double) async {
+        await loadIfNeeded()
         if let index = records.firstIndex(where: { $0.itemID == itemID }) {
             records[index].positionSeconds = position
             records[index].updatedAt = Date()
@@ -26,43 +31,29 @@ actor WatchHistoryStore {
             records.append(WatchRecord(itemID: itemID, positionSeconds: position,
                                        durationSeconds: duration, updatedAt: Date()))
         }
-        persist()
+        await persist()
     }
 
     func attach(_ item: MediaItem) async {
+        await loadIfNeeded()
         items[item.id] = item
-        persist()
+        await persist()
     }
 
     func recent(limit: Int) async -> [MediaItem] {
-        records.sorted { $0.updatedAt > $1.updatedAt }
+        await loadIfNeeded()
+        return records.sorted { $0.updatedAt > $1.updatedAt }
             .prefix(limit)
             .compactMap { items[$0.itemID] }
     }
 
     func progress(for itemID: UUID) async -> Double? {
-        records.first { $0.itemID == itemID }?.progress
+        await loadIfNeeded()
+        return records.first { $0.itemID == itemID }?.progress
     }
 
-    private func persist() {
-        struct Snapshot: Codable {
-            var records: [WatchRecord]
-            var items: [UUID: MediaItem]
-        }
-        let snapshot = Snapshot(records: records, items: items)
-        if let data = try? JSONEncoder().encode(snapshot) {
-            try? data.write(to: fileURL, options: .atomic)
-        }
-    }
-
-    private func load() {
-        struct Snapshot: Codable {
-            var records: [WatchRecord]
-            var items: [UUID: MediaItem]
-        }
-        guard let data = try? Data(contentsOf: fileURL),
-              let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data) else { return }
-        records = snapshot.records
-        items = snapshot.items
+    private func persist() async {
+        await persistence.writeWatchRecords(records)
+        await persistence.writeWatchlist(Array(items.values))
     }
 }

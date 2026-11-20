@@ -20,6 +20,9 @@
 | 扩展 | `.rexmod` 包（zip + 摘要 + Ed25519 签名）、JS Promise 双向桥、沙箱限流、调试面板 |
 | 界面 | 发现页模块系统、搜索、详情、播放器、片单、观看记录、库管理、环境管理、设置 |
 | 后端 | 零依赖参考实现，19 路由覆盖客户端全部 17 端点 |
+| 依赖栈 | 与 Rex 同款：KSPlayer/Alamofire/Nuke/AMSMB2/WCDB（SPM）+ FFmpeg/libplacebo/libass/libdovi/sherpa-onnx/GoogleCast（自编/CocoaPods） |
+| 持久化 | WCDB 实现已就绪（链接后自动启用），否则回落 JSON |
+| 本地化 | 14 语言 × 71 键，全部已声明 |
 
 ## ② 我能证明什么（证据在 `spec/verification-log.txt`）
 

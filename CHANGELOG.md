@@ -50,3 +50,13 @@
 - `SearchView`：本地库过滤 + 远端 `/api/metadata/search`（300ms 防抖、失败回落 TMDB 直连）
 - `WatchlistStore` + `WatchlistView`：片单持久化、详情页「Add to List」双向切换、观看页入口
 - `CatalogService.search(query:kind:year:)` 新增
+
+## R10 · 全面对齐 Rex
+- 依赖栈：`project.yml` 声明 KSPlayer / Alamofire / Nuke / AMSMB2 / WCDB（SPM），
+  另有 FFmpeg、libplacebo、libass、libdovi、sherpa-onnx、Google Cast 的接入说明（`DEPENDENCIES.md`）
+- 持久化：`NetCovePersistence` 协议 + `JSONPersistence` + `WCDBPersistence`（链接 WCDB 后自动启用），
+  三个 store 全部改走协议
+- Chromecast：Bonjour `_googlecast._tcp` 发现（无需 SDK）+ Google Cast SDK 受保护投放
+- 14 语言全量：所有语言 71/71 键已声明（同形词单独统计）
+- 模块边界：`tools/module_map.py` 算出 42 个跨模块 public 需求，并修掉 1 处反向依赖
+  （DesignTokens 下沉到 Core）；`MODULES.md` 给出 Rex 26 模块 ↔ 5 目录映射

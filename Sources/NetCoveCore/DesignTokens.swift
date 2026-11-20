@@ -1,6 +1,7 @@
 //
 //  DesignTokens.swift
 //  设计系统：对应原 App 的 RexDesign / RexDinoCore 模块（颜色、圆角、间距、字号）。
+//  放在 Core：App 与 Script 调试面板都要用，避免模块间反向依赖。
 //
 
 import SwiftUI

@@ -185,12 +185,15 @@ enum CastError: LocalizedError {
     case targetUnavailable
     case descriptionMissing
     case soapFailed(String)
+    case chromecastRequiresSDK
 
     var errorDescription: String? {
         switch self {
         case .targetUnavailable: return "Cast target is not reachable."
         case .descriptionMissing: return "Device description is missing a control URL."
         case .soapFailed(let message): return "Cast command failed: \(message.prefix(200))"
+        case .chromecastRequiresSDK:
+            return "Chromecast needs the Google Cast SDK. Add `google-cast-sdk` via CocoaPods to enable it."
         }
     }
 }
@@ -217,11 +220,26 @@ final class CastController: ObservableObject {
     @Published private(set) var connected: CastTarget?
 
     private let dlna = DLNAController()
+    private let chromecastDiscovery = ChromecastDiscovery()
+    #if canImport(GoogleCast)
+    private lazy var chromecast = ChromecastSession()
+    #endif
 
     func discover() async {
         isDiscovering = true
         defer { isDiscovering = false }
-        targets = await dlna.discover()
+
+        async let dlnaTargets = dlna.discover()
+        async let castDevices = chromecastDiscovery.discover()
+        let (dlnaResult, castResult) = await (dlnaTargets, castDevices)
+
+        let chromecastTargets = castResult.map { device in
+            CastTarget(id: "cast:\(device.name)",
+                       name: device.name,
+                       kind: .chromecast,
+                       location: device.host.flatMap { URL(string: "http://\($0):\(device.port)") })
+        }
+        targets = dlnaResult + chromecastTargets
     }
 
     func cast(url: URL, title: String, to target: CastTarget) async throws {
@@ -233,7 +251,15 @@ final class CastController: ObservableObject {
             // AirPlay 由系统路由面板接管，无需自绘 UI
             connected = target
         case .chromecast:
-            throw CastError.targetUnavailable
+            #if canImport(GoogleCast)
+            guard chromecast.startSession(deviceName: target.name) else {
+                throw CastError.targetUnavailable
+            }
+            try chromecast.load(url: url, title: title)
+            connected = target
+            #else
+            throw CastError.chromecastRequiresSDK
+            #endif
         }
     }
 }

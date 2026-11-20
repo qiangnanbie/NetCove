@@ -69,6 +69,8 @@ SYSTEM_TYPES = {
     'JSContext', 'JSValue', 'SecRandomCopyBytes',
     # AMSMB2（可选依赖）
     'SMBManager', 'SMBCredential',
+    # Foundation Bonjour
+    'NetService', 'NetServiceBrowser', 'NetServiceBrowserDelegate', 'NetServiceDelegate',
 }
 
 errors: list[str] = []
@@ -233,7 +235,9 @@ def check_type_references() -> None:
         if name not in known
         and name not in SYSTEM_TYPES
         and name.endswith(SUFFIXES)
-        and not name.startswith(('NS', 'AV', 'MTL', 'CV', 'CM', 'VT', 'CK', 'LA', 'CT', 'SF'))
+        # 系统框架前缀（NS/AV/MTL/...）与可选 SDK（GCK = Google Cast）不参与判定
+        and not name.startswith(('NS', 'AV', 'MTL', 'CV', 'CM', 'VT', 'CK', 'LA', 'CT', 'SF',
+                                 'GCK', 'WCDB', 'SMB', 'KS'))
     )
     if unresolved:
         for name in unresolved:

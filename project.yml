@@ -8,6 +8,23 @@ options:
   createIntermediateGroups: true
   groupSortPosition: top
 
+packages:
+  KSPlayer:
+    url: https://github.com/kingslay/KSPlayer
+    from: "4.0.0"
+  Alamofire:
+    url: https://github.com/Alamofire/Alamofire
+    from: "5.9.0"
+  Nuke:
+    url: https://github.com/kean/Nuke
+    from: "12.0.0"
+  AMSMB2:
+    url: https://github.com/amosavian/AMSMB2
+    from: "5.0.0"
+  WCDB:
+    url: https://github.com/Tencent/wcdb
+    from: "2.1.0"
+
 settings:
   base:
     SWIFT_VERSION: "5.9"
@@ -50,6 +67,11 @@ targets:
       - sdk: AVFoundation.framework
       - sdk: Speech.framework
       - sdk: CloudKit.framework
+      - package: KSPlayer
+      - package: Alamofire
+      - package: Nuke
+      - package: AMSMB2
+      - package: WCDB
     scheme:
       testTargets:
         - NetCoveTests

@@ -7,7 +7,7 @@
 "discover.recommended" = "Consigliati";
 "discover.environment" = "Ambiente di visione";
 "discover.metric.libraries" = "Librerie";
-"discover.metric.daily" = "Daily";
+"discover.metric.daily" = "Oggi";
 "library.title" = "Librerie";
 "library.empty" = "Nessuna libreria. Puoi aggiungere Jellyfin, Emby, Plex, SMB, WebDAV o una cartella locale.";
 "library.add" = "Aggiungi libreria";

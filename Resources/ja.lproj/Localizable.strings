@@ -7,7 +7,7 @@
 "discover.recommended" = "おすすめ";
 "discover.environment" = "視聴環境";
 "discover.metric.libraries" = "ライブラリ";
-"discover.metric.daily" = "Daily";
+"discover.metric.daily" = "今日";
 "library.title" = "ライブラリ";
 "library.empty" = "ライブラリがありません。Jellyfin・Emby・Plex・SMB・WebDAV・ローカルフォルダを追加できます。";
 "library.add" = "ライブラリを追加";

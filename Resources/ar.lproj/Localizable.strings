@@ -7,7 +7,7 @@
 "discover.recommended" = "مقترح";
 "discover.environment" = "بيئة المشاهدة";
 "discover.metric.libraries" = "المكتبات";
-"discover.metric.daily" = "Daily";
+"discover.metric.daily" = "اليوم";
 "library.title" = "المكتبات";
 "library.empty" = "لا توجد مكتبات بعد. أضف Jellyfin أو Emby أو Plex أو SMB أو WebDAV أو مجلدًا محليًا.";
 "library.add" = "إضافة مكتبة";
