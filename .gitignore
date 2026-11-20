@@ -11,9 +11,10 @@ Config/dev-signing/*.pem
 *.sqlite3
 *-pending.json
 
-# 生成物（可重建）
-Sources/NetCovePlayback/EngineTuning.generated.swift
-dist/
+# 生成物（仅忽略临时构建目录；调参产物与示例包必须入库，否则 CI 自检失败）
+/dist/
+project.local.yml
+project.full.yml
 
 # Python
 __pycache__/
