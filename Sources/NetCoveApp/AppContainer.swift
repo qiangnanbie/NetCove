@@ -31,6 +31,7 @@ final class AppContainer: ObservableObject {
     }
     let history: WatchHistoryStore
     let watchlistStore: WatchlistStore
+    let sync: CloudSyncEngine
 
     init() {
         let config = AppConfig()

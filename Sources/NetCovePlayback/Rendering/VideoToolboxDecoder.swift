@@ -142,16 +142,16 @@ final class VideoToolboxDecoder {
         guard !spsList.isEmpty, !ppsList.isEmpty else { return nil }
 
         var description: CMFormatDescription?
-        let status = spsList.withUnsafePointers { sps in
-            ppsList.withUnsafePointers { pps in
-                CMVideoFormatDescriptionCreateFromH264ParameterSets(
-                    allocator: kCFAllocatorDefault,
-                    parameterSetCount: sps.count + pps.count,
-                    parameterSetPointers: sps + pps,
-                    parameterSetSizes: sps.map { $0.count } + pps.map { $0.count },
-                    nalUnitHeaderLength: 4,
-                    formatDescriptionOut: &description)
-            }
+        let allSets = spsList + ppsList
+        let sizes = allSets.map { $0.count }
+        let status = allSets.withUnsafePointersAndSizes { pointers, lengths in
+            CMVideoFormatDescriptionCreateFromH264ParameterSets(
+                allocator: kCFAllocatorDefault,
+                parameterSetCount: pointers.count,
+                parameterSetPointers: pointers,
+                parameterSetSizes: lengths,
+                nalUnitHeaderLength: 4,
+                formatDescriptionOut: &description)
         }
         return status == noErr ? description : nil
     }
@@ -181,12 +181,12 @@ final class VideoToolboxDecoder {
         guard !parameterSets.isEmpty else { return nil }
 
         var description: CMFormatDescription?
-        let status = parameterSets.withUnsafePointers { sets in
+        let status = parameterSets.withUnsafePointersAndSizes { pointers, lengths in
             CMVideoFormatDescriptionCreateFromHEVCParameterSets(
                 allocator: kCFAllocatorDefault,
-                parameterSetCount: sets.count,
-                parameterSetPointers: sets,
-                parameterSetSizes: sets.map { $0.count },
+                parameterSetCount: pointers.count,
+                parameterSetPointers: pointers,
+                parameterSetSizes: lengths,
                 nalUnitHeaderLength: 4,
                 extensions: nil,
                 formatDescriptionOut: &description)
@@ -196,13 +196,15 @@ final class VideoToolboxDecoder {
 }
 
 extension Array where Element == [UInt8] {
-    /// 把 [[UInt8]] 转成 [UnsafePointer<UInt8>]（调用方保证生命周期）
-    func withUnsafePointers<R>(_ body: ([UnsafePointer<UInt8>]) -> R) -> R {
-        var results: [UnsafePointer<UInt8>] = []
+    /// 把 [[UInt8]] 转成 ([UnsafePointer<UInt8>], [Int])，回调期间指针有效
+    func withUnsafePointersAndSizes<R>(_ body: ([UnsafePointer<UInt8>], [Int]) -> R) -> R {
+        var pointers: [UnsafePointer<UInt8>] = []
+        var lengths: [Int] = []
         func walk(_ index: Int) -> R {
-            if index == count { return body(results) }
+            if index == count { return body(pointers, lengths) }
             return self[index].withUnsafeBufferPointer { buffer in
-                results.append(buffer.baseAddress!)
+                if let base = buffer.baseAddress { pointers.append(base) }
+                lengths.append(buffer.count)
                 return walk(index + 1)
             }
         }

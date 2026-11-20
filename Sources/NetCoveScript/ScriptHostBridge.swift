@@ -107,3 +107,8 @@ final class ScriptDebugLogStore: ObservableObject {
 
     func clear() { lines.removeAll() }
 }
+
+extension ScriptError {
+    /// 供运行时把 JS 异常/缺函数统一成 ScriptError
+    static func callFailed(_ reason: String) -> ScriptError { .invokeFailed(reason) }
+}

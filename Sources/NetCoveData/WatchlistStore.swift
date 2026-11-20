@@ -1,6 +1,6 @@
 //
 //  WatchlistStore.swift
-//  「稍后看 / 片单」：本地持久化的条目快照（接 CloudKit 后作为缓存层）。
+//  片单：本地持久化（走 NetCovePersistence，接 WCDB 后自动用数据库）。
 //  对应原 App 的 saved_mark / later_mark record type。
 //
 
@@ -8,36 +8,47 @@ import Foundation
 
 actor WatchlistStore {
     private var items: [MediaItem] = []
-    private let fileURL: URL
+    private var loaded = false
+    private let persistence: NetCovePersistence
 
-    init() {
-        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? URL(fileURLWithPath: NSTemporaryDirectory())
-        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        fileURL = base.appendingPathComponent("watchlist.json")
-        load()
+    init(persistence: NetCovePersistence = PersistenceFactory.make()) {
+        self.persistence = persistence
     }
 
-    func all() -> [MediaItem] { items }
+    private func loadIfNeeded() async {
+        guard !loaded else { return }
+        items = await persistence.readWatchlist()
+        loaded = true
+    }
 
-    func contains(id: UUID) -> Bool { items.contains { $0.id == id } }
+    func all() async -> [MediaItem] {
+        await loadIfNeeded()
+        return items
+    }
+
+    func contains(id: UUID) async -> Bool {
+        await loadIfNeeded()
+        return items.contains { $0.id == id }
+    }
 
     @discardableResult
-    func add(_ item: MediaItem) -> Bool {
+    func add(_ item: MediaItem) async -> Bool {
+        await loadIfNeeded()
         guard !items.contains(where: { $0.sourceID == item.sourceID }) else { return false }
         items.insert(item, at: 0)
-        persist()
+        await persistence.writeWatchlist(items)
         return true
     }
 
-    func remove(sourceID: String) {
+    func remove(sourceID: String) async {
+        await loadIfNeeded()
         items.removeAll { $0.sourceID == sourceID }
-        persist()
+        await persistence.writeWatchlist(items)
     }
 
-    func remove(id: UUID) {
+    func remove(id: UUID) async {
+        await loadIfNeeded()
         items.removeAll { $0.id == id }
-        persist()
+        await persistence.writeWatchlist(items)
     }
-
 }
