@@ -29,8 +29,7 @@ jobs:
         run: python3 tools/verify_module.py examples/dist/tv.netcove.example.hello-1.0.0.rexmod
 
       - name: Swift toolchain
-        run: |
-          swift --version || (sudo apt-get update -qq && sudo apt-get install -y -qq swiftlang)
+        run: swift --version
 
       - name: Swift syntax parse (all sources)
         run: |
@@ -70,8 +69,9 @@ jobs:
       - name: Generate project (no third-party deps)
         run: |
           brew install xcodegen
-          python3 -m pip install --quiet pyyaml
-          python3 scripts/gen_project.py
+          python3 -m venv .venv
+          .venv/bin/pip install --quiet pyyaml
+          .venv/bin/python scripts/gen_project.py
 
       - name: Archive (unsigned)
         run: |
