@@ -38,8 +38,11 @@ NetCove/
 `static` job（ubuntu）**已通过**：仓库自检 15 项、一致性审计 6 项、模块签名校验、
 以及用 Swift 6.4.2 对全部 66 个 Swift 文件做 `swiftc -parse`（零语法错误）。
 
-`unsigned-ipa` job（macos-14）在当前仓库是 **cancelled**：GitHub 免费计划的**私有仓库不提供 macOS runner**。
-两条解法：① 把仓库设为 public（公开仓库的 macOS runner 免费）；② 升级计划或改用你自己的 Mac。
+`unsigned-ipa` job（`macos-latest`）**已成功**：`xcodebuild archive` → `Payload/` → `NetCove-unsigned.ipa`
+（678 KB，`tv.netcove.app`，arm64，iOS 17.0），产物在 Actions run 的 Artifacts 里。
+
+> 踩过的坑：`macos-14` / `macos-13` 这两个标签在本账号下不可用（job 一提交就 cancelled，无 runner 分配），
+> 换成 `macos-latest` 才正常。私有仓库同样不行，需要转 public。
 
 ## 出包
 
