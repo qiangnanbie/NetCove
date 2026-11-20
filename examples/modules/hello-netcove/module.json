@@ -1,0 +1,12 @@
+{
+  "id": "tv.netcove.example.hello",
+  "name": "Hello NetCove",
+  "version": "1.0.0",
+  "author": "NetCove",
+  "entry": "main.js",
+  "capabilities": [
+    "http",
+    "tmdb"
+  ],
+  "signature": "c88e79bd2aebbea1f4ad359d3001c8cac65202421e3d339cb6f962f91673ce53e06143ac3240469e013daae581a0267bb988509434b5b5adc0737c36477e8406"
+}

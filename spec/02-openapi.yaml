@@ -1,0 +1,498 @@
+openapi: 3.1.0
+info:
+  title: NetCove API
+  version: 1.1.0
+  description: 无付费墙版本的完整客户端契约（17 个端点）。原 App 的 license / points / security / attestation 四组已移除，原始提取清单见
+    spec/99-original-endpoints.md。
+servers:
+- url: https://api.netcove.app
+  description: 业务域
+- url: https://auth.netcove.app
+  description: 账号域
+- url: http://127.0.0.1:8787
+  description: 本地参考实现 Server/netcove_server.py
+tags:
+- name: account
+- name: catalog
+- name: support
+- name: misc
+components:
+  securitySchemes:
+    accountToken:
+      type: apiKey
+      in: header
+      name: x-netcove-account-token
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        code:
+          type: string
+          nullable: true
+        message:
+          type: string
+          nullable: true
+        data:
+          type: object
+          additionalProperties: true
+          nullable: true
+    TokenPair:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+    MediaDetails:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        original_title:
+          type: string
+          nullable: true
+        year:
+          type: integer
+          nullable: true
+        overview:
+          type: string
+          nullable: true
+        poster_path:
+          type: string
+          nullable: true
+        backdrop_path:
+          type: string
+          nullable: true
+        runtime_minutes:
+          type: integer
+          nullable: true
+        genres:
+          type: array
+          items:
+            type: string
+        vote_average:
+          type: number
+          nullable: true
+    MatchResult:
+      type: object
+      properties:
+        external_id:
+          type: string
+        title:
+          type: string
+        year:
+          type: integer
+          nullable: true
+        poster_url:
+          type: string
+          nullable: true
+        score:
+          type: number
+  responses:
+    Unauthorized:
+      description: Token 缺失或过期
+    NotFound:
+      description: 资源不存在
+paths:
+  /v1/native/email/login:
+    post:
+      tags:
+      - account
+      operationId: emailLogin
+      summary: emailLogin
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/email/code:
+    post:
+      tags:
+      - account
+      operationId: emailCode
+      summary: emailCode
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/email/verify:
+    post:
+      tags:
+      - account
+      operationId: emailVerify
+      summary: emailVerify
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/token/refresh:
+    post:
+      tags:
+      - account
+      operationId: tokenRefresh
+      summary: tokenRefresh
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/session/logout:
+    post:
+      tags:
+      - account
+      operationId: sessionLogout
+      summary: sessionLogout
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/passkeys/list:
+    get:
+      tags:
+      - account
+      operationId: passkeyList
+      summary: passkeyList
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/passkeys/remove:
+    post:
+      tags:
+      - account
+      operationId: passkeyRemove
+      summary: passkeyRemove
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/native/exchange:
+    post:
+      tags:
+      - account
+      operationId: nativeExchange
+      summary: nativeExchange
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/metadata:
+    get:
+      tags:
+      - catalog
+      operationId: metadata
+      summary: metadata
+      security:
+      - accountToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/metadata/search:
+    get:
+      tags:
+      - catalog
+      operationId: searchMetadata
+      summary: searchMetadata
+      security:
+      - accountToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/metadata/playback/metadata:
+    post:
+      tags:
+      - catalog
+      operationId: playbackMetadata
+      summary: playbackMetadata
+      security:
+      - accountToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/catalog/match:
+    post:
+      tags:
+      - catalog
+      operationId: catalogMatch
+      summary: catalogMatch
+      security:
+      - accountToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/catalog/title-hints:
+    post:
+      tags:
+      - catalog
+      operationId: catalogTitleHints
+      summary: catalogTitleHints
+      security:
+      - accountToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/discovery/ai-search:
+    post:
+      tags:
+      - catalog
+      operationId: aiSearch
+      summary: aiSearch
+      security:
+      - accountToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/integrations:
+    get:
+      tags:
+      - misc
+      operationId: integrations
+      summary: integrations
+      security:
+      - accountToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/notifications:
+    get:
+      tags:
+      - misc
+      operationId: notifications
+      summary: notifications
+      security:
+      - accountToken: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/support/feedback:
+    post:
+      tags:
+      - support
+      operationId: supportFeedback
+      summary: supportFeedback
+      security:
+      - accountToken: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'

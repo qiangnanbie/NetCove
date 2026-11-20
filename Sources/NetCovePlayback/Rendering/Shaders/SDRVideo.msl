@@ -1,0 +1,59 @@
+//
+//  SDRVideo.msl
+//  普通 SDR（BT.709）/ HLG 路径：NV12/P010 双平面 → 线性 → 编码输出。
+//  走 AVPlayer 时这一步由系统做；走 FFmpeg 软件解码时才需要。
+//
+
+#include <metal_stdlib>
+using namespace metal;
+
+struct SDRUniforms {
+    float3x3 yuvToRGB;   // BT.709 或 BT.2020 的 YCbCr → RGB 矩阵
+    float    transfer;   // 0 = sRGB(2.2), 1 = HLG
+    float    hlgPeakNits;
+    float    unused0;
+    float    unused1;
+};
+
+struct VSOut {
+    float4 position [[position]];
+    float2 uv;
+};
+
+static inline float hlgOETFInverse(float v) {
+    const float a = 0.17883277;
+    const float b = 0.28466892;
+    const float c = 0.55991073;
+    return v <= 0.5 ? (v * v) / 3.0 : (exp((v - c) / a) + b) / 12.0;
+}
+
+vertex VSOut sdrVertex(uint vid [[vertex_id]]) {
+    float2 pos[3] = { float2(-1.0, -3.0), float2(-1.0, 1.0), float2(3.0, 1.0) };
+    VSOut out;
+    out.position = float4(pos[vid], 0.0, 1.0);
+    out.uv = pos[vid] * float2(0.5, -0.5) + 0.5;
+    return out;
+}
+
+fragment float4 sdrFragment(VSOut in [[stage_in]],
+                            texture2d<float> yPlane [[texture(0)]],
+                            texture2d<float> uvPlane [[texture(1)]],
+                            constant SDRUniforms &u [[buffer(0)]]) {
+    constexpr sampler s(filter::linear, address::clamp_to_edge);
+
+    float y = yPlane.sample(s, in.uv).r;
+    float2 uv = uvPlane.sample(s, in.uv).rg;
+    // limited range → full range
+    y = (y - 16.0 / 255.0) * (255.0 / 219.0);
+    uv = (uv - 0.5) * (255.0 / 224.0);
+
+    float3 yuv = float3(y, uv.x, uv.y);
+    float3 rgb = clamp(u.yuvToRGB * yuv, 0.0, 1.0);
+
+    if (u.transfer > 0.5) {
+        rgb = float3(hlgOETFInverse(rgb.r), hlgOETFInverse(rgb.g), hlgOETFInverse(rgb.b));
+        rgb *= u.hlgPeakNits / 1000.0;
+    }
+    float3 outColor = pow(max(rgb, 0.0), float3(1.0 / 2.2));
+    return float4(outColor, 1.0);
+}

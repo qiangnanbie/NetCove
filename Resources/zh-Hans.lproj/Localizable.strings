@@ -1,0 +1,82 @@
+/* NetCove 简体中文 */
+
+"tab.discover" = "发现";
+"tab.library" = "媒体库";
+"tab.watching" = "观看";
+"tab.settings" = "设置";
+
+"discover.recommended" = "推荐";
+"discover.environment" = "观看环境";
+"discover.metric.libraries" = "媒体库";
+"discover.metric.daily" = "今日";
+
+"module.continueWatching" = "继续观看";
+"module.recent" = "最近添加";
+"module.recommended" = "推荐";
+"module.unwatched" = "未观看";
+"module.genres" = "类型";
+
+"library.title" = "媒体库";
+"library.empty" = "还没有媒体库。可以添加 Jellyfin、Emby、Plex、SMB、WebDAV 或本地文件夹。";
+"library.add" = "添加媒体库";
+"library.unlimited" = "媒体库与观看环境数量不限。";
+"library.scan.failed" = "扫描失败";
+
+"watching.continue" = "继续观看";
+"watching.continue.empty" = "暂无进行中的内容";
+"watching.recent" = "最近";
+"watching.recent.empty" = "暂无观看记录";
+
+"settings.account" = "账号";
+"settings.account.status" = "状态";
+"settings.account.signed.in" = "已登录";
+"settings.account.signed.out" = "仅本地";
+"settings.environments" = "观看环境";
+"settings.environments.manage" = "管理观看环境";
+"settings.playback" = "播放";
+"settings.playback.engines" = "引擎";
+"settings.playback.formats" = "格式";
+"settings.subtitles" = "字幕";
+"settings.subtitles.text" = "文本格式";
+"settings.subtitles.bitmap" = "位图格式";
+"settings.subtitles.ai" = "AI 字幕";
+"settings.capabilities" = "能力";
+"settings.about" = "关于";
+"settings.about.version" = "版本";
+"settings.about.bundle" = "包标识";
+
+"env.manage" = "观看环境";
+"env.new.placeholder" = "新环境名称";
+"env.create" = "创建";
+"env.copy" = "复制";
+"env.delete" = "删除";
+"env.delete.confirm" = "删除该环境及其全部观看数据？";
+"env.default" = "默认";
+"env.footer" = "每个环境有独立的媒体库、模块与观看记录。";
+
+"env.pin" = "PIN 码";
+"env.pin.set" = "设置 6 位 PIN";
+"env.pin.entry" = "输入该环境的 6 位 PIN";
+"env.pin.placeholder" = "6 位数字";
+"env.pin.remove" = "关闭 PIN";
+"env.pin.mismatch" = "两次 PIN 不一致，请重新设置。";
+"env.pin.locked" = "尝试次数过多";
+"env.pin.locked.format" = "请在 %lld 分钟后重试";
+"env.unlock" = "解锁观看环境";
+"env.unlock.faceid" = "使用 Face ID 解锁";
+"env.unlock.pin" = "使用 PIN";
+
+"player.play" = "播放";
+"player.pause" = "暂停";
+"player.subtitles" = "字幕";
+"player.subtitles.off" = "关闭";
+"player.subtitles.ai" = "自动（AI）";
+"player.subtitles.embedded" = "内嵌";
+"player.done" = "完成";
+"player.preparing" = "正在准备…";
+"player.cast" = "投屏";
+"player.danmaku" = "弹幕";
+
+"detail.overview" = "简介";
+"detail.addToList" = "加入片单";
+"detail.minutes" = "分钟";

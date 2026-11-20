@@ -1,0 +1,90 @@
+/* NetCove — 基础文案（自有词条，按命名空间组织；其余 13 语言待翻译） */
+
+/* Tabs */
+"tab.discover" = "Discover";
+"tab.library" = "Library";
+"tab.watching" = "Watching";
+"tab.settings" = "Settings";
+
+/* Discover */
+"discover.recommended" = "Recommended";
+"discover.environment" = "Viewing Environment";
+"discover.metric.libraries" = "Libraries";
+"discover.metric.daily" = "Daily";
+
+/* Library */
+"library.title" = "Libraries";
+"library.empty" = "No libraries yet";
+"library.add" = "Add Library";
+
+/* Watching */
+"watching.continue" = "Continue";
+"watching.continue.empty" = "Nothing in progress";
+"watching.recent" = "Recent";
+"watching.recent.empty" = "History is empty";
+
+/* Settings */
+"settings.account" = "Account";
+"settings.account.status" = "Status";
+"settings.account.signed.in" = "Signed in";
+"settings.account.signed.out" = "Not signed in";
+"settings.environments" = "Environments";
+"settings.playback" = "Playback";
+"settings.about" = "About";
+"settings.about.version" = "Version";
+"settings.about.bundle" = "Bundle";
+
+/* 授权门禁（与原 App 同义，措辞自写） */
+
+/* 限制原因 */
+
+/* 观看环境 */
+
+/* Modules / environments / player */
+"module.continueWatching" = "Continue Watching";
+"module.recent" = "Recently Added";
+"module.recommended" = "Recommended";
+"module.unwatched" = "Unwatched";
+"module.genres" = "Genres";
+"library.unlimited" = "Unlimited libraries and viewing environments.";
+"library.scan.failed" = "Scan failed";
+"settings.environments.manage" = "Manage Environments";
+"settings.playback.engines" = "Engines";
+"settings.subtitles" = "Subtitles";
+"settings.playback.formats" = "Formats";
+"settings.subtitles.text" = "Text formats";
+"settings.subtitles.bitmap" = "Bitmap";
+"settings.subtitles.ai" = "AI subtitles";
+"settings.capabilities" = "Capabilities";
+"env.manage" = "Environments";
+"env.new.placeholder" = "New environment name";
+"env.create" = "Create";
+"env.copy" = "Copy";
+"env.delete" = "Delete";
+"env.delete.confirm" = "Delete this environment and all its viewing data?";
+"env.default" = "Default";
+"env.footer" = "Each environment keeps its own libraries, modules and watch history.";
+"env.pin" = "PIN";
+"env.pin.set" = "Set a 6-digit PIN";
+"env.pin.entry" = "Enter this environment's 6-digit PIN";
+"env.pin.placeholder" = "6 digits";
+"env.pin.remove" = "Turn off PIN";
+"env.pin.mismatch" = "The PINs don't match. Set it again.";
+"env.pin.locked" = "Too Many Attempts";
+"env.pin.locked.format" = "Try again in %lld min";
+"env.unlock" = "Unlock Viewing Environment";
+"env.unlock.faceid" = "Unlock with Face ID";
+"env.unlock.pin" = "Use PIN";
+"player.play" = "Play";
+"player.pause" = "Pause";
+"player.subtitles" = "Subtitles";
+"player.subtitles.off" = "Off";
+"player.subtitles.ai" = "Auto (AI)";
+"player.subtitles.embedded" = "Embedded";
+"player.done" = "Done";
+"player.preparing" = "Preparing…";
+"player.cast" = "Cast";
+"player.danmaku" = "Danmaku";
+"detail.overview" = "Overview";
+"detail.addToList" = "Add to List";
+"detail.minutes" = "min";

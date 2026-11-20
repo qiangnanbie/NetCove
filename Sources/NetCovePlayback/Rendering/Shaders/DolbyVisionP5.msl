@@ -1,0 +1,121 @@
+//
+//  DolbyVisionP5.msl
+//  Dolby Vision Profile 5：IPTPQc2 (ICtCp-PQ) → BT.2020 线性 → 目标显示
+//  与 AVPlayer 的差别：P5 没有 HDR10 回退层，必须自己按 IPTPQc2 解码，
+//  否则典型的偏紫/偏灰就是"没做这个矩阵"。
+//
+//  坐标约定：输入是三平面 10bit YUV（Y + Cb + Cr），BT.2020 非恒定亮度编码。
+//
+
+#include <metal_stdlib>
+using namespace metal;
+
+struct DVUniforms {
+    float3x3  yuvToLms;      // YCbCr(BT.2020 CL) → LMS (IPTPQc2)
+    float3x3  lmsToBt2020;   // LMS → BT.2020 线性
+    float     sourceMinPQ;   // RPU 的 source_min_pq / 4095
+    float     sourceMaxPQ;   // RPU 的 source_max_pq / 4095
+    float     targetNits;    // 目标峰值亮度（SDR 100 / HDR 1000+）
+    float     level5Offset;  // RPU level5 的左右/上下裁剪（简化成单一缩放）
+    float2    aspectScale;
+    uint      toneMapMode;   // 0 = clip, 1 = BT.2390, 2 = 线性
+};
+
+struct VSOut {
+    float4 position [[position]];
+    float2 uv;
+};
+
+// PQ (SMPTE ST 2084) EOTF，输入 [0,1]
+static inline float pqToLinear(float pq) {
+    const float m1 = 2610.0 / 16384.0;
+    const float m2 = 2523.0 / 32.0;
+    const float c1 = 3424.0 / 4096.0;
+    const float c2 = 2413.0 / 128.0;
+    const float c3 = 2392.0 / 128.0;
+    float p = pow(pq, 1.0 / m2);
+    float num = max(p - c1, 0.0);
+    float den = c2 - c3 * p;
+    return pow(num / max(den, 1e-6), 1.0 / m1); // 归一化到 [0,1]，1.0 = 10000 nits
+}
+
+// BT.2390 EETF（简化版，单参数 target nits）
+static inline float bt2390(float linear, float sourcePeakNits, float targetPeakNits) {
+    float maxLum = targetPeakNits / 10000.0;
+    float source = linear * (sourcePeakNits / 10000.0);
+    // 归一化到 source peak
+    float e1 = source / maxLum;
+    float ks = 1.5 * maxLum - 0.5;
+    if (e1 < ks) return e1 * maxLum;
+    float t = (e1 - ks) / max(1.0 - ks, 1e-6);
+    float e2 = (1.0 - ks) * (1.0 - pow(1.0 - t, 2.0)) / (1.0 - t);
+    return min((t * t * (3.0 - 2.0 * t) * e2 + (1.0 - (t * t * (3.0 - 2.0 * t))) * e1) * maxLum, maxLum);
+}
+
+// 线性 BT.2020 → 线性 BT.709（给 SDR 屏用）
+static inline float3 bt2020ToBt709(float3 c) {
+    const float3x3 m = float3x3(
+        float3( 1.6605, -0.5876, -0.0728),
+        float3(-0.1246,  1.1329, -0.0083),
+        float3(-0.0182, -0.1006,  1.1187));
+    return m * c;
+}
+
+vertex VSOut dvVertex(uint vid [[vertex_id]]) {
+    // 全屏三角
+    float2 pos[3] = { float2(-1.0, -3.0), float2(-1.0, 1.0), float2(3.0, 1.0) };
+    VSOut out;
+    out.position = float4(pos[vid], 0.0, 1.0);
+    out.uv = pos[vid] * float2(0.5, -0.5) + 0.5;
+    return out;
+}
+
+fragment float4 dvFragment(VSOut in [[stage_in]],
+                           texture2d<float> yPlane  [[texture(0)]],
+                           texture2d<float> cbPlane [[texture(1)]],
+                           texture2d<float> crPlane [[texture(2)]],
+                           constant DVUniforms &u [[buffer(0)]]) {
+    constexpr sampler s(filter::linear, address::clamp_to_edge);
+
+    // 10bit 三平面（归一化到 [0,1]）
+    float y  = yPlane.sample(s, in.uv).r;
+    float cb = cbPlane.sample(s, in.uv).r - 0.5;
+    float cr = crPlane.sample(s, in.uv).r - 0.5;
+
+    // IPTPQc2：YCbCr(BT.2020 non-constant-luminance) → LMS' (PQ 域)
+    float3 yuv = float3(y, cb, cr);
+    float3 lmsPq = u.yuvToLms * yuv;
+
+    // PQ 反变换：在 PQ 域减去 source_min_pq 后线性化
+    float3 lms = float3(
+        pqToLinear(clamp(lmsPq.r, 0.0, 1.0)),
+        pqToLinear(clamp(lmsPq.g, 0.0, 1.0)),
+        pqToLinear(clamp(lmsPq.b, 0.0, 1.0)));
+    float minL = pqToLinear(u.sourceMinPQ);
+    lms = max(lms - minL, 0.0) / max(1.0 - minL, 1e-6);
+
+    // LMS → BT.2020 线性
+    float3 bt2020 = clamp(u.lmsToBt2020 * lms, 0.0, 1.0);
+
+    // 亮度映射（RPU 的 source_max_pq 与目标亮度）
+    float sourceNits = pqToLinear(u.sourceMaxPQ) * 10000.0;
+    if (u.toneMapMode == 1) {
+        bt2020 = float3(bt2390(bt2020.r, sourceNits, u.targetNits),
+                        bt2390(bt2020.g, sourceNits, u.targetNits),
+                        bt2390(bt2020.b, sourceNits, u.targetNits));
+    } else if (u.toneMapMode == 0) {
+        bt2020 = min(bt2020, u.targetNits / 10000.0) / max(u.targetNits / 10000.0, 1e-6);
+    }
+
+    // 色域：SDR 屏需要 BT.2020 → BT.709；HDR 屏直接输出 BT.2020
+    float3 rgb = (u.targetNits <= 250.0) ? bt2020ToBt709(bt2020) : bt2020;
+
+    // level5 裁剪比例（简化：细边框保护）
+    rgb *= (1.0 - u.level5Offset);
+
+    // 转 sRGB 输出
+    float3 encoded = (u.targetNits <= 250.0)
+        ? pow(max(rgb, 0.0), float3(1.0 / 2.2))
+        : rgb;
+    return float4(encoded, 1.0);
+}
