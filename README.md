@@ -1,3 +1,5 @@
+![build](https://github.com/qiangnanbie/NetCove/actions/workflows/build.yml/badge.svg)
+
 # NetCove
 
 `tv.netcove.app` · iOS 17+ · Swift 5.9 / SwiftUI · **无付费墙**
@@ -30,6 +32,14 @@ NetCove/
 ├── spec/                      架构 / 契约 / 鉴权 / 播放调参 / 类型清单 / 差距 / CloudKit / 后端
 └── tools/                     提取与改名脚本
 ```
+
+## CI 状态说明
+
+`static` job（ubuntu）**已通过**：仓库自检 15 项、一致性审计 6 项、模块签名校验、
+以及用 Swift 6.4.2 对全部 66 个 Swift 文件做 `swiftc -parse`（零语法错误）。
+
+`unsigned-ipa` job（macos-14）在当前仓库是 **cancelled**：GitHub 免费计划的**私有仓库不提供 macOS runner**。
+两条解法：① 把仓库设为 public（公开仓库的 macOS runner 免费）；② 升级计划或改用你自己的 Mac。
 
 ## 出包
 
