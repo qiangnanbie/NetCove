@@ -8,7 +8,7 @@ import Foundation
 import CloudKit
 
 /// 同步实体（先覆盖最常变的五类，其余 record type 按同一模式扩展）
-enum SyncEntityKind: String, CaseIterable {
+enum SyncEntityKind: String, CaseIterable, Codable {
     case library        = "catalog"
     case environment    = "environment"
     case watchRecord    = "media_watched"

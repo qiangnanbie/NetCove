@@ -88,6 +88,8 @@ final class DanmakuMetalRenderer {
             let centerY = 1.0 - (2.0 * (layout.topInset + CGFloat(item.lane) * layout.laneHeight)
                                  + pixelHeight) / viewSize.height
             let color = UIColor(Color(hex: item.comment.colorHex))
+            var red: CGFloat = 1, green: CGFloat = 1, blue: CGFloat = 1, alpha: CGFloat = 1
+            color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
 
             instances.append(Instance(
                 center: SIMD2<Float>(Float(centerX), Float(centerY)),
@@ -95,10 +97,7 @@ final class DanmakuMetalRenderer {
                                    Float(2 * pixelHeight / viewSize.height)),
                 uvOrigin: slot.uvOrigin,
                 uvSize: slot.uvSize,
-                color: SIMD4<Float>(Float(color.redComponent),
-                                    Float(color.greenComponent),
-                                    Float(color.blueComponent),
-                                    1)
+                color: SIMD4<Float>(Float(red), Float(green), Float(blue), Float(alpha))
             ))
         }
     }

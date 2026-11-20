@@ -32,6 +32,7 @@ final class AppContainer: ObservableObject {
     let history: WatchHistoryStore
     let watchlistStore: WatchlistStore
     let sync: CloudSyncEngine
+    private var locks: [UUID: EnvironmentLock] = [:]
 
     init() {
         let config = AppConfig()
