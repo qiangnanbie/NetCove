@@ -298,7 +298,8 @@ def check_doc_claims() -> None:
         with open(matrix, encoding='utf-8') as handle:
             rows = sum(1 for _ in handle) - 1
     tests = len(glob.glob(os.path.join(ROOT, 'Tests/NetCoveTests/*.swift')))
-    swift = len(glob.glob(os.path.join(ROOT, 'Sources/**/*.swift'), recursive=True))
+    swift = len(glob.glob(os.path.join(ROOT, 'Sources/**/*.swift'), recursive=True)) \
+        + len(glob.glob(os.path.join(ROOT, 'Tests/**/*.swift'), recursive=True))
 
     checks = {
         'spec/06-gap-analysis.md': None,

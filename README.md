@@ -36,7 +36,7 @@ NetCove/
 ## CI 状态说明
 
 `static` job（ubuntu）**已通过**：仓库自检 15 项、一致性审计 6 项、模块签名校验、
-以及用 Swift 6.4.2 对全部 66 个 Swift 文件做 `swiftc -parse`（零语法错误）。
+以及用 Swift 6.4.2 对全部 60 个 Swift 文件做 `swiftc -parse`（零语法错误）。
 
 `unsigned-ipa` job（macos-14）在当前仓库是 **cancelled**：GitHub 免费计划的**私有仓库不提供 macOS runner**。
 两条解法：① 把仓库设为 public（公开仓库的 macOS runner 免费）；② 升级计划或改用你自己的 Mac。
