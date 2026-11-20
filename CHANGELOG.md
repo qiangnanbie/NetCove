@@ -45,3 +45,8 @@
 - `tools/audit.py`：端点 switch 覆盖、类型引用、导航目的地、文档数字、死代码
 - 修 4 处：AI 字幕接线、DV 检测接线、删 2 个被替代的死代码类型
 - `spec/14-acceptance.md` 可执行验收清单
+
+## R9 · 搜索与片单
+- `SearchView`：本地库过滤 + 远端 `/api/metadata/search`（300ms 防抖、失败回落 TMDB 直连）
+- `WatchlistStore` + `WatchlistView`：片单持久化、详情页「Add to List」双向切换、观看页入口
+- `CatalogService.search(query:kind:year:)` 新增

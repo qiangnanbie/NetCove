@@ -59,6 +59,8 @@ cd Server && python3 netcove_server.py     # http://localhost:8787
 | 字幕 | SRT/VTT 解析已实现；ASS 走 libass；PGS/VobSub 需 FFmpeg 解码 |
 | AI 字幕 | 音频抽取 + Speech.framework 已实现；sherpa-onnx 接口就绪（需模型） |
 | 发现页模块系统 | 已实现（内置 4 种 + 自定义模块位） |
+| 搜索 | 本地库过滤 + 远端元数据搜索（防抖、TMDB 回落） |
+| 片单 | 详情页加入/移出、观看页入口、本地持久化 |
 | 观看环境 | 创建/复制/删除/切换已实现；PIN 与 Face ID 待接 |
 | 脚本模块 | `.rexmod` 打包/签名/安装 + JS Promise 双向桥 + 调试面板（装载/Probe/日志）全部可用 |
 | AI 字幕 | 音频抽取 + Speech 已实现；模型管理（下载/校验/删除）就绪，sherpa-onnx 接口待接模型 |

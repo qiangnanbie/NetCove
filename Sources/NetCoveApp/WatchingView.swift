@@ -49,6 +49,15 @@ struct WatchingView: View {
                 }
             }
             .navigationTitle("Watching")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        WatchlistView()
+                    } label: {
+                        Image(systemName: "bookmark")
+                    }
+                }
+            }
         }
     }
 }

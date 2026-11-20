@@ -9,6 +9,7 @@ struct DetailsView: View {
     let item: MediaItem
     @EnvironmentObject private var container: AppContainer
     @State private var showPlayer = false
+    @State private var inWatchlist = false
 
     var body: some View {
         ScrollView {
@@ -29,8 +30,17 @@ struct DetailsView: View {
                         }
 
                         Button {
+                            Task {
+                                if inWatchlist {
+                                    await container.removeFromWatchlist(item)
+                                } else {
+                                    await container.addToWatchlist(item)
+                                }
+                                inWatchlist = await container.isInWatchlist(item)
+                            }
                         } label: {
-                            Label("Add to List", systemImage: "plus")
+                            Label(inWatchlist ? "In List" : "Add to List",
+                                  systemImage: inWatchlist ? "checkmark" : "plus")
                                 .font(DesignTokens.Typography.body)
                                 .padding(.horizontal, 18)
                                 .padding(.vertical, 12)
@@ -50,6 +60,7 @@ struct DetailsView: View {
             }
         }
         .background(DesignTokens.Surface.base)
+        .task { inWatchlist = await container.isInWatchlist(item) }
         .navigationBarTitleDisplayMode(.inline)
         .fullScreenCover(isPresented: $showPlayer) {
             PlayerView(item: item)

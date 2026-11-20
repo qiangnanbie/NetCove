@@ -92,6 +92,34 @@ final class CatalogService {
         )
     }
 
+    /// GET /api/metadata/search?q=&kind=&year=
+    func search(query: String, kind: MediaItem.Kind? = nil, year: Int? = nil) async throws -> [ScoredMatch] {
+        struct Response: Decodable {
+            let results: [Item]
+            struct Item: Decodable {
+                let id: String
+                let title: String
+                let year: Int?
+                let posterUrl: String?
+                let score: Double?
+            }
+        }
+        var queryItems = ["q": query]
+        if let kind { queryItems["kind"] = kind.rawValue }
+        if let year { queryItems["year"] = String(year) }
+
+        do {
+            let response: Response = try await api.request(.searchMetadata, query: queryItems)
+            return response.results.map {
+                ScoredMatch(externalID: $0.id, title: $0.title, year: $0.year,
+                            posterURL: $0.posterUrl.flatMap { URL(string: $0) },
+                            score: $0.score ?? 0.5)
+            }
+        } catch {
+            return try await tmdbSearch(title: query, year: year, kind: kind ?? .movie)
+        }
+    }
+
     func aiSearch(query: String) async throws -> [ScoredMatch] {
         struct Request: Encodable { let query: String }
         struct Response: Decodable {

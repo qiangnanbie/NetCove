@@ -30,6 +30,7 @@ final class AppContainer: ObservableObject {
         }
     }
     let history: WatchHistoryStore
+    let watchlistStore: WatchlistStore
 
     init() {
         let config = AppConfig()
@@ -38,6 +39,7 @@ final class AppContainer: ObservableObject {
         self.store = LibraryStore()
         self.catalog = CatalogService(api: api)
         self.history = WatchHistoryStore()
+        self.watchlistStore = WatchlistStore()
         self.sync = CloudSyncEngine()
     }
 
@@ -72,6 +74,24 @@ final class AppContainer: ObservableObject {
     }
 
     var currentLock: EnvironmentLock { lock(for: currentEnvironment) }
+
+    // MARK: - 片单
+
+    func watchlist() async -> [MediaItem] {
+        await watchlistStore.all()
+    }
+
+    func addToWatchlist(_ item: MediaItem) async {
+        await watchlistStore.add(item)
+    }
+
+    func removeFromWatchlist(_ item: MediaItem) async {
+        await watchlistStore.remove(id: item.id)
+    }
+
+    func isInWatchlist(_ item: MediaItem) async -> Bool {
+        await watchlistStore.contains(id: item.id)
+    }
 
     func add(_ library: Library) async {
         libraries.append(library)

@@ -8,6 +8,7 @@ import SwiftUI
 struct DiscoverView: View {
     @EnvironmentObject private var container: AppContainer
     @State private var modules: [HomeModule] = HomeModule.builtIn()
+    @State private var showSearch = false
 
     var body: some View {
         NavigationStack {
@@ -28,6 +29,13 @@ struct DiscoverView: View {
             .background(DesignTokens.Surface.base)
             .navigationTitle("Discover")
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        showSearch = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {
                         EnvironmentManagerView()
@@ -36,6 +44,9 @@ struct DiscoverView: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showSearch) {
+            SearchView()
         }
     }
 }
