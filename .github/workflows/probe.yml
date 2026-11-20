@@ -1,0 +1,16 @@
+name: probe
+on:
+  workflow_dispatch:
+jobs:
+  u:
+    runs-on: ubuntu-latest
+    steps: [{ run: echo ubuntu ok }]
+  w:
+    runs-on: windows-latest
+    steps: [{ run: echo windows ok }]
+  m13:
+    runs-on: macos-13
+    steps: [{ run: echo macos13 ok }]
+  mlatest:
+    runs-on: macos-latest
+    steps: [{ run: echo macos-latest ok }]
