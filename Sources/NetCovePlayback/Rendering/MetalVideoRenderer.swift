@@ -8,6 +8,7 @@
 import Foundation
 import Metal
 import MetalKit
+import SwiftUI
 import UIKit
 import simd
 
@@ -185,7 +186,7 @@ final class MetalVideoRenderer: NSObject, VideoFrameRenderer {
             let descriptor = MTLTextureDescriptor.texture2DDescriptor(
                 pixelFormat: format, width: max(width, 1), height: max(height, 1), mipmapped: false)
             descriptor.usage = [.shaderRead]
-            descriptor.storageMode = .managed
+            descriptor.storageMode = .shared
             return device.makeTexture(descriptor: descriptor)
         }
 

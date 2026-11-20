@@ -8,7 +8,7 @@ import Combine
 
 @MainActor
 final class AppContainer: ObservableObject {
-    @Published private(set) var environments: [ViewingEnvironment] = [.home]
+    @Published var environments: [ViewingEnvironment] = [.home]
     @Published var currentEnvironment: ViewingEnvironment = .home
     @Published var libraries: [Library] = []
     @Published var recent: [MediaItem] = []

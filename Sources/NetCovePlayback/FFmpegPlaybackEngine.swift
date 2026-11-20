@@ -17,7 +17,7 @@ import Libavformat
 import Libavcodec
 import Libavutil
 
-final class FFmpegPlaybackEngine: PlaybackEngine {
+final class FFmpegPlaybackEngine: PlaybackEngine, MetalRendererProviding {
     var preferences = EnginePreferences.default
 
     private var formatContext: UnsafeMutablePointer<AVFormatContext>?

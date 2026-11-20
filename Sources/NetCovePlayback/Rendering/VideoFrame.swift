@@ -41,6 +41,11 @@ struct VideoFrameDescriptor {
     var isHDR: Bool { transfer == .pq || transfer == .hlg || dolbyVision != nil }
 }
 
+/// 能提供 Metal 渲染器的引擎（FFmpeg 路径实现；AVPlayer 路径不实现）
+protocol MetalRendererProviding: AnyObject {
+    var metalRenderer: MetalVideoRenderer? { get }
+}
+
 /// 渲染层接口（Metal 实现见 MetalVideoRenderer）
 protocol VideoFrameRenderer: AnyObject {
     func prepare(probe: PlaybackProbe) throws

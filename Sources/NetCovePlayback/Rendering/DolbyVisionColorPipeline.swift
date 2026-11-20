@@ -22,11 +22,17 @@ struct DVUniforms {
 
 struct DolbyVisionColorPipeline {
     /// BT.2020 非恒定亮度 YCbCr → LMS（IPTPQc2 编码矩阵）
-    static let yuvToLms = simd_float3x3(
-        SIMD3<Float>( 2048,      2048,      2048),
-        SIMD3<Float>( 6610,     -13613,     7003),
-        SIMD3<Float>( 17933,   -17390,    -543)
-    ) / 4096.0
+    static let yuvToLms: simd_float3x3 = {
+        let matrix = simd_float3x3(
+            SIMD3<Float>( 2048,    2048,    2048),
+            SIMD3<Float>( 6610,  -13613,    7003),
+            SIMD3<Float>(17933,  -17390,    -543)
+        )
+        let scale = Float(1.0 / 4096.0)
+        return simd_float3x3(columns: (matrix.columns.0 * scale,
+                                       matrix.columns.1 * scale,
+                                       matrix.columns.2 * scale))
+    }()
 
     /// LMS' → BT.2020 线性（逆 IPTPQc2 第二段）
     static let lmsToBt2020 = simd_float3x3(

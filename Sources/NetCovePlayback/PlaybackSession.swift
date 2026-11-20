@@ -53,7 +53,7 @@ final class PlaybackSession: ObservableObject {
             self.engine = engine
             try await engine.prepare(url: resource.url, probe: probed)
             displayPlayer = engine.playerForDisplay
-            displayRenderer = (engine as? FFmpegPlaybackEngine)?.metalRenderer
+            displayRenderer = (engine as? MetalRendererProviding)?.metalRenderer
             await engine.play()
             startedAt = Date()
             state = .playing
