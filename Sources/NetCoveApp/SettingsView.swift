@@ -14,7 +14,7 @@ struct SettingsView: View {
             List {
                 Section("Account") {
                     LabeledContent("Status",
-                                   value: container.auth.isSignedIn ? "Signed in" : "Local only")
+                                   value: String(localized: container.auth.isSignedIn ? "Signed in" : "Local only"))
                 }
 
                 Section("Environments") {

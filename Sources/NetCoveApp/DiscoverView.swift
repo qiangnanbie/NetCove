@@ -78,7 +78,7 @@ private struct ModuleSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.s) {
-            Text(module.title)
+            Text(LocalizedStringKey(module.title))
                 .font(DesignTokens.Typography.title)
                 .padding(.horizontal, DesignTokens.Spacing.m)
 

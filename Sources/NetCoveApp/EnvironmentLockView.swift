@@ -29,7 +29,7 @@ struct EnvironmentLockView: View {
                 }
                 if case .cooldown = lock.state {
                     LabeledContent("Status",
-                                   value: String(format: "Try again in %lld min",
+                                   value: String(format: String(localized: "Try again in %lld min"),
                                                  Int(lock.cooldownRemaining() / 60) + 1))
                 }
             } header: {
@@ -70,7 +70,7 @@ struct EnvironmentLockView: View {
                 }
             } footer: {
                 if let message {
-                    Text(message).foregroundStyle(.red)
+                    Text(LocalizedStringKey(message)).foregroundStyle(.red)
                 } else {
                     Text(lock.hasPIN
                          ? "Enter the PIN to unlock this environment. 5 wrong attempts trigger a 5-minute cooldown."
@@ -162,13 +162,13 @@ struct LockGateView: View {
                 }
 
                 if let message {
-                    Text(message)
+                    Text(LocalizedStringKey(message))
                         .font(DesignTokens.Typography.caption)
                         .foregroundStyle(.red)
                 }
 
                 if case .cooldown = lock.state {
-                    Text(String(format: "Try again in %lld min", Int(lock.cooldownRemaining() / 60) + 1))
+                    Text(String(format: String(localized: "Try again in %lld min"), Int(lock.cooldownRemaining() / 60) + 1))
                         .font(DesignTokens.Typography.caption)
                         .foregroundStyle(.orange)
                 }
