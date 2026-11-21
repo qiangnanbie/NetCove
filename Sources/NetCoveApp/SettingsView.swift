@@ -45,11 +45,18 @@ struct SettingsView: View {
                             if newValue { container.sync.startPeriodicSync() }
                         }
                     ))
+                    .disabled(!CloudSyncEngine.isAvailable)
                     if case .running(let step) = container.sync.state {
                         LabeledContent("Status", value: step)
                     }
                     Button("Sync now") {
                         Task { await container.sync.syncNow() }
+                    }
+                    .disabled(!CloudSyncEngine.isAvailable)
+                    if !CloudSyncEngine.isAvailable {
+                        Text("This build has no iCloud entitlement, so sync stays off. Everything else works.")
+                            .font(DesignTokens.Typography.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
 

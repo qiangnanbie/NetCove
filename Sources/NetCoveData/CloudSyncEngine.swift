@@ -38,8 +38,15 @@ final class CloudSyncEngine: ObservableObject {
     @Published private(set) var lastSyncAt: Date?
     @Published var isEnabled: Bool = UserDefaults.standard.bool(forKey: "netcove.sync.enabled")
 
-    private let container: CKContainer
-    private let database: CKDatabase
+    /// iCloud 容器惰性创建。签名里没有 iCloud entitlement（免费 Apple ID、企业内测、
+    /// 未开启该能力的 App ID）时，启动阶段调用 CKContainer.default() 会直接抛 ObjC 异常，
+    /// Swift 无法捕获，表现是点图标后立刻闪退。所以这里不在 init 里触碰 CloudKit。
+    private let containerIdentifier: String?
+    private lazy var container: CKContainer = {
+        if let containerIdentifier { return CKContainer(identifier: containerIdentifier) }
+        return CKContainer.default()
+    }()
+    private lazy var database: CKDatabase = container.privateCloudDatabase
     private let zoneID: CKRecordZone.ID
     private let local: LocalSyncStore
     private var timer: Task<Void, Never>?
@@ -47,10 +54,12 @@ final class CloudSyncEngine: ObservableObject {
     /// zone 名与 schema 对齐：原 App 是 rex-main，这里 netcove-main
     static let zoneName = "netcove-main"
 
+    /// 当前签名/账号是否真的具备 iCloud 能力。没有时返回 false，且不抛异常。
+    /// 用于设置页降级展示，避免用户在无权限的签名上打开同步后崩溃。
+    static var isAvailable: Bool { FileManager.default.ubiquityIdentityToken != nil }
+
     init(containerIdentifier: String? = nil, local: LocalSyncStore = LocalSyncStore()) {
-        let container = containerIdentifier.map { CKContainer(identifier: $0) } ?? CKContainer.default()
-        self.container = container
-        self.database = container.privateCloudDatabase
+        self.containerIdentifier = containerIdentifier
         self.zoneID = CKRecordZone.ID(zoneName: Self.zoneName, ownerName: CKCurrentUserDefaultName)
         self.local = local
     }
@@ -76,7 +85,7 @@ final class CloudSyncEngine: ObservableObject {
     // MARK: - 主流程
 
     func syncNow() async {
-        guard isEnabled else { return }
+        guard isEnabled, Self.isAvailable else { return }
         state = .running("Preparing")
         do {
             try await ensureZone()
